@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydroponic Growth Chamber</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #d9f7e8; /* Light green background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        header {
+            background-color: #4CAF50; /* Darker green header */
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        section {
+            background-color: #fff;
+            margin: 20px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            flex: 1;
+            max-width: calc(50% - 40px); /* 50% with some spacing */
+        }
+
+        h2 {
+            color: #4CAF50; /* Dark green heading */
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #333; /* Dark gray text */
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        #rawImage {
+            width: 100%;
+            order: -1; /* Move to the beginning */
+        }
+
+        /* Green color for plant name */
+        #plant1 p:nth-child(1),
+        #plant2 p:nth-child(1),
+        #plant3 p:nth-child(1) {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        /* Style for chamber conditions */
+        #chamberConditions {
+            background-color: #f2f9f4; /* Lighter green for chamber conditions */
+            border: 2px solid #4CAF50; /* Dark green border for chamber conditions */
+            border-radius: 10px;
+        }
+
+        /* Style for setpoint and actual conditions */
+        #setpointConditions,
+        #actualConditions {
+            background-color: #fff; /* White background for setpoint and actual conditions */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 20px; /* Add some spacing between sections */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Hydroponic Growth Chamber</h1>
+    </header>
+
+    <section>
+        <h2>Images</h2>
+        <img id="rawImage" src="raw_image.jpg" alt="Raw Image">
+        <div>
+            <h2>Threshold Image</h2>
+            <img src="thresh_image.jpg" alt="Threshold Image">
+        </div>
+        <div>
+            <h2>ROI Image</h2>
+            <img src="roi_image.jpg" alt="ROI Image">
+        </div>
+    </section>
+
+    <section>
+        <h2>Plant Information</h2>
+        <div id="plant1">
+            <p>Name: <span style="color: #4CAF50;">{{ plant1.name }}</span></p>
+            <p>Grow Rate: <span id="growRate1">{{ plant1.growRate }}</span></p>
+            <p>% Area: <span id="areaPercentage1">{{ plant1.areaPercentage }}</span></p>
+            <p>Days Since Identification: <span id="daysSinceIdentification1">{{ plant1.daysSinceIdentification }}</span></p>
+            <p>Days Until Harvest: <span id="daysUntilHarvest1">{{ plant1.daysUntilHarvest }}</span></p>
+        </div>
+        <div id="plant2">
+            <p>Name: <span style="color: #4CAF50;">{{ plant2.name }}</span></p>
+            <p>Grow Rate: <span id="growRate2">{{ plant2.growRate }}</span></p>
+            <p>% Area: <span id="areaPercentage2">{{ plant2.areaPercentage }}</span></p>
+            <p>Days Since Identification: <span id="daysSinceIdentification2">{{ plant2.daysSinceIdentification }}</span></p>
+            <p>Days Until Harvest: <span id="daysUntilHarvest2">{{ plant2.daysUntilHarvest }}</span></p>
+        </div>
+        <div id="plant3">
+            <p>Name: <span style="color: #4CAF50;">{{ plant3.name }}</span></p>
+            <p>Grow Rate: <span id="growRate3">{{ plant3.growRate }}</span></p>
+            <p>% Area: <span id="areaPercentage3">{{ plant3.areaPercentage }}</span></p>
+            <p>Days Since Identification: <span id="daysSinceIdentification3">{{ plant3.daysSinceIdentification }}</span></p>
+            <p>Days Until Harvest: <span id="daysUntilHarvest3">{{ plant3.daysUntilHarvest }}</span></p>
+        </div>
+    </section>
+    
+
+    <section id="chamberConditions">
+        <h2>Chamber Conditions</h2>
+        <div id="setpointConditions">
+            <h2>Setpoint Conditions</h2>
+            <p id="setpoint_temperature">Temperature Setpoint: {{ setpoint_temperature }}</p>
+            <p id="setpoint_humidity">Humidity Setpoint: {{ setpoint_humidity }}</p>
+            <p id="setpoint_electrical_conductivity">Electrical Conductivity Setpoint: {{ setpoint_electrical_conductivity }}</p>
+            <p id="setpoint_ph">pH Setpoint: {{ setpoint_ph }}</p>
+        </div>
+        <div id="actualConditions">
+            <h2>Actual Conditions</h2>
+            <p id="actual_temperature">Actual Temperature: {{ actual_temperature }}</p>
+            <p id="actual_humidity">Actual Humidity: {{ actual_humidity }}</p>
+            <p id="actual_electrical_conductivity">Actual Electrical Conductivity: {{ actual_electrical_conductivity }}</p>
+            <p id="actual_ph">Actual pH: {{ actual_ph }}</p>
+        </div>
+    </section>
+    
+</body>
+</html>
