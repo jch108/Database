@@ -6,6 +6,7 @@ import random
 import serial
 import time
 import threading
+import io
 # from flask import Flask, request, jsonify, render_template
 
 #-----------------------------------------------------------------------
@@ -56,7 +57,8 @@ def loadDatabase():
                         "INSERT OR REPLACE INTO plants (pid, basic, display_pid, maintenance, parameter, image) VALUES (?, ?, ?, ?, ?, ?)",
                         (pid, basic_data, display_pid, maintenance_data, parameter_data, image)
                     )
-                    conn.commit()  #commit the changes to the database
+                    #commit the changes to the database
+                    conn.commit()
 
                 else:
                     print(f"Warning: Missing or invalid 'pid' in JSON file - {file_name}")
@@ -262,29 +264,54 @@ def clearCvDatabase():
 
 # ser = serial.Serial('COM1', 9600)
 
-# def sendDataToAtMega(temp, humid, ec, ph):
-#     # Send data to AtMega microcontroller
-#     data = f"T:{temp},H:{humid},EC:{ec},PH:{ph}\n"
-#     ser.write(data.encode())
+# Mock serial connection
+fake_serial = io.BytesIO()
+ser = fake_serial
 
-# def closeSerial():
-#     ser.close()
+light_cmd = 0
+
+def sendDataToAtMega(temp, humid, ec, ph):
+    global ser
+    # Send data to AtMega microcontroller
+    data = f"T:{temp},H:{humid},EC:{ec},PH:{ph},L:{light_cmd}\n"
+    print(data)
+    print("Data.enocde: ", data.encode())
+    ser.write(data)
+
+def receiveDataFromAtMega():
+    try:
+        # Read data from the serial port
+        raw_data = ser.readline().decode().strip()
+
+        # Parse the received data
+        data_parts = raw_data.split(',')
+        temp = float(data_parts[0].split(':')[1])
+        humid = float(data_parts[1].split(':')[1])
+        ec = float(data_parts[2].split(':')[1])
+        ph = float(data_parts[3].split(':')[1])
+
+        print(f"Received Data: Temperature={temp}, Humidity={humid}, EC={ec}, pH={ph}")
+
+        return temp, humid, ec, ph
+
+    except Exception as e:
+        print(f"Error receiving data from AtMega: {e}")
+        return None
+
+def closeSerial():
+    ser.close()
     
-# def turn_on_lights():
-#     ser.write(b"LIGHTS_ON\n")
 
-# def turn_off_lights():
-#     ser.write(b"LIGHTS_OFF\n")
-
+#COMMENTED OUT TO RUN TESTS
 # def lightThread():
 #     while True:
 #         current_time = time.localtime()
 #         current_hour = current_time.tm_hour
 #         # 6am to 8pm
 #         if 6 <= current_hour < 22:
-#             turn_on_lights()
+#             light_cmd = 1;
 #         else:
-#             turn_off_lights()
+#             light_cmd = 0;
 
 #         # Check every hour
 #         time.sleep(3600)
@@ -299,81 +326,81 @@ def clearCvDatabase():
 #---------------------Website Communication-----------------------------
 #-----------------------------------------------------------------------
 
-from flask import Flask, render_template
-from flask_socketio import SocketIO
+# from flask import Flask, render_template
+# from flask_socketio import SocketIO
 
-app = Flask(__name__)
-socketio = SocketIO(app)
+# app = Flask(__name__)
+# socketio = SocketIO(app)
 
-# Placeholder data for plant information
-app.config['plants'] = {
-    "plant1": {
-        "name": "Plant 1",
-        "growRate": "Some rate",
-        "areaPercentage": "Some percentage",
-        "daysSinceIdentification": "Some days",
-        "daysUntilHarvest": "Some days",
-    },
-    "plant2": {
-        "name": "Plant 2",
-        "growRate": "Some rate",
-        "areaPercentage": "Some percentage",
-        "daysSinceIdentification": "Some days",
-        "daysUntilHarvest": "Some days",
-    },
-    "plant3": {
-        "name": "Plant 3",
-        "growRate": "Some rate",
-        "areaPercentage": "Some percentage",
-        "daysSinceIdentification": "Some days",
-        "daysUntilHarvest": "Some days",
-    },
-    # Add information for other plants as needed
-}
+# # Placeholder data for plant information
+# app.config['plants'] = {
+#     "plant1": {
+#         "name": "Plant 1",
+#         "growRate": "Some rate",
+#         "areaPercentage": "Some percentage",
+#         "daysSinceIdentification": "Some days",
+#         "daysUntilHarvest": "Some days",
+#     },
+#     "plant2": {
+#         "name": "Plant 2",
+#         "growRate": "Some rate",
+#         "areaPercentage": "Some percentage",
+#         "daysSinceIdentification": "Some days",
+#         "daysUntilHarvest": "Some days",
+#     },
+#     "plant3": {
+#         "name": "Plant 3",
+#         "growRate": "Some rate",
+#         "areaPercentage": "Some percentage",
+#         "daysSinceIdentification": "Some days",
+#         "daysUntilHarvest": "Some days",
+#     },
+#     # Add information for other plants as needed
+# }
 
-# Placeholder data for chamber conditions
-app.config['chamber_conditions'] = {
-    "setpoint_temperature": 25.0,  # Initial setpoint temperature
-    "setpoint_humidity": 60.0,
-    "setpoint_electrical_conductivity": 1.5,
-    "setpoint_ph": 6.0,
-    "actual_temperature": 24.0,
-    "actual_humidity": 58.0,
-    "actual_electrical_conductivity": 1.4,
-    "actual_ph": 5.8,
-}
+# # Placeholder data for chamber conditions
+# app.config['chamber_conditions'] = {
+#     "setpoint_temperature": 25.0,  # Initial setpoint temperature
+#     "setpoint_humidity": 60.0,
+#     "setpoint_electrical_conductivity": 1.5,
+#     "setpoint_ph": 6.0,
+#     "actual_temperature": 24.0,
+#     "actual_humidity": 58.0,
+#     "actual_electrical_conductivity": 1.4,
+#     "actual_ph": 5.8,
+# }
 
-@app.context_processor
-def inject_data():
-    return dict(
-        plants=app.config['plants'],
-        chamber_conditions=app.config['chamber_conditions'],
-        setpoint_temperature=app.config['chamber_conditions']["setpoint_temperature"],
-        setpoint_humidity=app.config['chamber_conditions']["setpoint_humidity"],
-        setpoint_electrical_conductivity=app.config['chamber_conditions']["setpoint_electrical_conductivity"],
-        setpoint_ph=app.config['chamber_conditions']["setpoint_ph"],
-        actual_temperature=app.config['chamber_conditions']["actual_temperature"],
-        actual_humidity=app.config['chamber_conditions']["actual_humidity"],
-        actual_electrical_conductivity=app.config['chamber_conditions']["actual_electrical_conductivity"],
-        actual_ph=app.config['chamber_conditions']["actual_ph"],
-        # Plant-specific variables
-        plant1=app.config['plants'].get("plant1", {}),
-        plant2=app.config['plants'].get("plant2", {}),
-        plant3=app.config['plants'].get("plant3", {})
-    )
+# @app.context_processor
+# def inject_data():
+#     return dict(
+#         plants=app.config['plants'],
+#         chamber_conditions=app.config['chamber_conditions'],
+#         setpoint_temperature=app.config['chamber_conditions']["setpoint_temperature"],
+#         setpoint_humidity=app.config['chamber_conditions']["setpoint_humidity"],
+#         setpoint_electrical_conductivity=app.config['chamber_conditions']["setpoint_electrical_conductivity"],
+#         setpoint_ph=app.config['chamber_conditions']["setpoint_ph"],
+#         actual_temperature=app.config['chamber_conditions']["actual_temperature"],
+#         actual_humidity=app.config['chamber_conditions']["actual_humidity"],
+#         actual_electrical_conductivity=app.config['chamber_conditions']["actual_electrical_conductivity"],
+#         actual_ph=app.config['chamber_conditions']["actual_ph"],
+#         # Plant-specific variables
+#         plant1=app.config['plants'].get("plant1", {}),
+#         plant2=app.config['plants'].get("plant2", {}),
+#         plant3=app.config['plants'].get("plant3", {})
+#     )
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
 
-@app.route('/update_setpoint_temperature')
-def update_setpoint_temperature():
-    # Update the setpoint temperature
-    app.config['chamber_conditions']["setpoint_temperature"] += 1.0
-    socketio.emit('update_temperature', app.config['chamber_conditions']["setpoint_temperature"])
-    print("Setpoint temperature updated successfully.")
-    return "Setpoint temperature updated successfully."
+# @app.route('/update_setpoint_temperature')
+# def update_setpoint_temperature():
+#     # Update the setpoint temperature
+#     app.config['chamber_conditions']["setpoint_temperature"] += 1.0
+#     socketio.emit('update_temperature', app.config['chamber_conditions']["setpoint_temperature"])
+#     print("Setpoint temperature updated successfully.")
+#     return "Setpoint temperature updated successfully."
 
-if __name__ == '__main__':
-    socketio.run(app, debug=True, use_reloader=False)
+# if __name__ == '__main__':
+#     socketio.run(app, debug=True, use_reloader=False)
